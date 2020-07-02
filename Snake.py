@@ -9,25 +9,29 @@ def alinhamento(): #Alinhar a comida com a cobrinha, padronizando as posições 
 def colisao_maca(c1, c2): #Teste de colisão entre objetos.
     return (c1[0] == c2[0]) and (c1[1] == c2[1])
 
-def colisao_borda(c1, tela): #Teste de colisão com as bordas da tela.
-    return (c1[0] == tela[0]) and (c1[1] == tela[1])
+def colisao_borda(c1): #Teste de colisão com as bordas da tela.
+    return (True if c1[0] == 1000 or c1[1] == 600
+            or c1[0] < 0 or c1[1] < 0 else False)
 
-def colisao_corpo(): #Teste de colisão com partes do próprio jogo.
-    return()
+def colisao_corpo(snake): #Teste de colisão com partes do próprio corpo.
+    for i in range(1, len(snake) - 1): 
+        if snake[0][0] == snake[i][0] and snake[0][1] == snake[i][1]:
+            return True
+    return False
 
 #Direções da cobrinha.
 UP = 0
 DOWN = 1
-RIGHT = 3
 LEFT = 2
-
-pontos = 0 #Contagem de pontos.
+RIGHT = 3
 
 pygame.init()
+pygame.font.init()
 
 #O jogo foi pensado para dividir os componentes em quadrados de 10x10 pixels.
-tela = pygame.display.set_mode((1000, 600))#Tela do jogo (funciona como uma matriz).
+tela = pygame.display.set_mode((1000, 650))#Tela do jogo (funciona como uma matriz).
 pygame.display.set_caption('Snake')#Título da tela.
+
 
 snake = [(300, 300),(310, 300),(320, 300)]
 #A cobrinha é representada por uma lista de posições onde se encontra no plano da tela.
@@ -42,36 +46,38 @@ comida.fill((255, 2, 3))
 
 direcao = LEFT #Direção inicial da cobrinha.
 
-fps = pygame.time.Clock()
-#Objeto para controlar o fps do jogo.
+fps = pygame.time.Clock() #Objeto para controlar o fps do jogo.
+vel = 5 #Velocidade do fps.
+
+pontuacao = pygame.font.SysFont('Comic Sans MS', 18) #Definir fonte de escrita na tela.
+pontos = 0 #Contagem de pontos.
 
 while True:#Laço necessário para o funcionamneto do jogo.
-    fps.tick(30)
+    fps.tick(vel)
 
     for event in pygame.event.get():#Caputar os eventos do jogo (apertar teclas, por exemplo).
         if event.type == QUIT:
             pygame.quit()
         
         if event.type == KEYDOWN:#Eventos de pressionar as teclas para controlar a cobrinha.
-            if event.key == K_UP:
+            if event.key == K_UP and direcao is not DOWN:
                 direcao = UP
-            if event.key == K_DOWN:
+            if event.key == K_DOWN and direcao is not UP:
                 direcao = DOWN
-            if event.key == K_LEFT:
+            if event.key == K_LEFT and direcao is not RIGHT:
                 direcao = LEFT
-            if event.key == K_RIGHT:
+            if event.key == K_RIGHT and direcao is not LEFT:
                 direcao = RIGHT
     
-    if colisao_borda(snake[0], tela):
-        pygame.init()
-        tela_final = pygame.display.set_mode((320, 240))#Tela de fim de jogo.
-        pygame.display.set_caption('Resultado Final')#Título da tela.
-        tela_final.blit(pontos, (160, 120))
-
+    if colisao_borda(snake[0]):
+       pygame.quit()
+       break
+        
     if colisao_maca(snake[0], pos_comida): 
         pos_comida = alinhamento() #Gera nova comida.
         snake.append((0, 0)) #Aumenta a cobrinha.
         pontos += 1
+        vel = (vel + 1 if vel <= 30 and (pontos%5 == 0) else vel)
 
     #Movimentos da cobrinha a partir da "cabeça".
     if direcao == UP:
@@ -90,6 +96,14 @@ while True:#Laço necessário para o funcionamneto do jogo.
     tela.fill((0, 0, 0))#"Limpar" a tela de jogo.
     tela.blit(comida, pos_comida)#Plotar a comida na tela.
 
+    pygame.draw.line(tela, (255, 255, 255), (0, 610), (1000, 610))
+
+    #Criar score na tela.
+    pont_text = pontuacao.render("Score: " + str(pontos), True, (255, 255, 255)) 
+    pont_rect = pont_text.get_rect()
+    pont_rect.topleft = (1000 - 120, 615)
+    tela.blit(pont_text, pont_rect)
+
     for pos in snake:
         tela.blit(corpo, pos)
         #A função blit é responsável por plotar a imagem na tela de jogo, recebendo como
@@ -97,3 +111,20 @@ while True:#Laço necessário para o funcionamneto do jogo.
         #por manipular objetos na superfície da tela de jogo.
 
     pygame.display.update()#Atualizar a tela do jogo.
+
+pygame.init()
+
+tela = pygame.display.set_mode((320, 240))#Tela do jogo (funciona como uma matriz).
+pygame.display.set_caption('Resultado Final')#Título da tela.
+
+tela.fill((0, 0, 0))
+
+tela.blit(pontuacao, ((320/2), (240/2)))
+
+while True:
+    if event.type == KEYDOWN:
+        if event.key == K_KP_ENTER:
+            pygame.quit()
+            break
+
+exit()
