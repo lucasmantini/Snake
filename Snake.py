@@ -13,10 +13,6 @@ def colisao_borda(c1): #Teste de colisão com as bordas da tela.
     return (True if c1[0] == 1000 or c1[1] == 600
             or c1[0] < 0 or c1[1] < 0 else False)
 
-def colisao_corpo(c1, snake): #Teste de colisão com partes do próprio corpo.
-    
-    return False
-
 #Direções da cobrinha.
 UP = 0
 DOWN = 1
@@ -45,7 +41,7 @@ comida.fill((255, 2, 3))
 direcao = 10 #Direção inicial da cobrinha.
 
 fps = pygame.time.Clock() #Objeto para controlar o fps do jogo.
-vel = 5 #Velocidade do fps.
+vel = 10 #Velocidade do fps.
 
 pontuacao = pygame.font.SysFont('Comic Sans MS', 18) #Definir fonte de escrita na tela.
 pontos = 0 #Contagem de pontos.
@@ -56,7 +52,6 @@ while True:#Laço necessário para o funcionamneto do jogo.
     for event in pygame.event.get():#Caputar os eventos do jogo (apertar teclas, por exemplo).
         if event.type == QUIT:
             pygame.quit()
-            exit()
         
         if event.type == KEYDOWN:#Eventos de pressionar as teclas para controlar a cobrinha.
             if event.key == K_UP and direcao != DOWN:
@@ -79,7 +74,7 @@ while True:#Laço necessário para o funcionamneto do jogo.
         pos_comida = alinhamento() #Gera nova comida.
         snake.append((0, 0)) #Aumenta a cobrinha.
         pontos += 1
-        vel = (vel + 1 if vel <= 30 and (pontos%5 == 0) else vel)
+        vel = (vel + 1 if vel <= 60 and (pontos%5 == 0) else vel)
 
     #Movimentos da cobrinha a partir da "cabeça".
     if direcao == UP:
@@ -106,6 +101,12 @@ while True:#Laço necessário para o funcionamneto do jogo.
     pont_rect.topleft = (1000 - 120, 615)
     tela.blit(pont_text, pont_rect)
 
+    #Velocidade na tela.
+    pont_text = pontuacao.render("Velocidade: " + str(vel_tela), True, (255, 255, 255)) 
+    pont_rect = pont_text.get_rect()
+    pont_rect.topleft = (50, 615)
+    tela.blit(pont_text, pont_rect)
+
     for pos in snake:
         tela.blit(corpo, pos)
         #A função blit é responsável por plotar a imagem na tela de jogo, recebendo como
@@ -120,14 +121,13 @@ while True: #Tela final.
     pont_rect = pont_text.get_rect()
     pont_rect.midtop = (500, 250)
     tela.blit(pont_text, pont_rect)
-    pont_text = pontuacao.render("Total: " + str(pontos), True, (255, 255, 255)) 
+    pont_text = pontuacao.render("Pontos Totais: {0}".format(pontos), True, (255, 255, 255)) 
     pont_rect = pont_text.get_rect()
     pont_rect.midtop = (500, 310)
     tela.blit(pont_text, pont_rect)
     pygame.display.update()
-    pygame.time.wait(1000)
-    while True:
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                exit()
+    for event in pygame.event.get():#Caputar os eventos do jogo (apertar teclas, por exemplo).
+        if event.type == QUIT:
+            pygame.quit()
+
+exit()
